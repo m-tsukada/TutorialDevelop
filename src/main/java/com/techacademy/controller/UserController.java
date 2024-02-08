@@ -56,23 +56,31 @@ public class UserController {
 
     /** User更新画面を表示 */
     @GetMapping("/update/{id}/")
-    public String getUser(@PathVariable("id") Integer id, Model model) {
-        // Modelに登録
-        model.addAttribute("user", service.getUser(id));
+    public String getUser(@PathVariable("id") Integer id, User user, Model model) {
+        if (id != null) {
+            // Modelに登録
+            model.addAttribute("user", service.getUser(id));
+        } else {
+            model.addAttribute("user", user);
+        }
         // User更新画面に遷移
         return "user/update";
     }
 
     /** User更新処理 */
     @PostMapping("/update/{id}/")
-    public String postUser(User user) {
+    public String postUser(@Validated User user, BindingResult res, Model model) {
+        if(res.hasErrors()) {
+            //エラーがある場合getUser()メソッドを呼び出します。その際引数のidにnull を設定する
+            return getUser(null, user, model); // 追加
+        }
         // User登録
         service.saveUser(user);
+
         // 一覧画面にリダイレクト
         return "redirect:/user/list";
     }
 
-    // ----- 追加:ここから -----
     /** User削除処理 */
     @PostMapping(path="list", params="deleteRun")
     public String deleteRun(@RequestParam(name="idck") Set<Integer> idck, Model model) {
@@ -81,5 +89,5 @@ public class UserController {
         // 一覧画面にリダイレクト
         return "redirect:/user/list";
     }
-    // ----- 追加:ここまで -----
+   
 }
